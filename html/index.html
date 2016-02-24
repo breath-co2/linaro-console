@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <!-- Your app title -->
+    <title>我的控制台</title>
+    <!-- Path to Framework7 iOS CSS theme styles-->
+    <link rel="stylesheet" href="framework7/dist/css/framework7.ios.min.css">
+    <!-- Path to Framework7 iOS related color styles -->
+    <link rel="stylesheet" href="framework7/dist/css/framework7.ios.colors.min.css">
+    <link rel="apple-touch-icon-precomposed" href="icon.png" />
+    <style type="text/css">
+      .hide {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Status bar overlay for full screen mode (PhoneGap) -->
+    <div class="statusbar-overlay"></div>
+
+    <div class="views">
+      <div class="view view-main">
+        <!-- Top Navbar-->
+        <div class="navbar">
+          <div class="navbar-inner">
+            <div class="center sliding">我的控制台</div>
+          </div>
+        </div>
+
+        <div class="pages navbar-through toolbar-through">
+          <!-- Page, "data-page" contains page name -->
+          <div data-page="index" class="page">
+            <!-- Scrollable page content -->
+            <div class="page-content pull-to-refresh-content">
+
+<div class="pull-to-refresh-layer">
+  <div class="preloader"></div>
+  <div class="pull-to-refresh-arrow"></div>
+</div>
+
+<div class="list-block">
+  <ul>
+  <li style="height:47px;">
+    <div class="item-content">
+      <div class="item-inner">
+      <div class="item-title label">迅雷远程状态</div>
+        <div id="xunlei-status">
+          <span class="preloader"></span>
+          <span class="errorinfo"></span>
+          <label class="label-switch hide">
+            <input type="checkbox">
+            <div class="checkbox"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    </li>
+  <li style="height:47px;">
+    <div class="item-content">
+      <div class="item-inner">
+      <div class="item-title label">共享盘挂载状态</div>
+        <div id="afp-status">
+          <span class="preloader"></span>
+          <span class="errorinfo"></span>
+          <label class="label-switch hide">
+            <input type="checkbox">
+            <div class="checkbox"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    </li>
+  </ul>
+</div>
+
+<div class="content-block-title">百度云管理</div>
+<div class="list-block inset">
+<ul>
+<li><a href="#" class="list-button item-link baidu-compare">查看文件差异列表</a></li>
+<li><a href="#" class="list-button item-link baidu-action" data-action="download">百度云下载到本地</a></li>
+<li><a href="#" class="list-button item-link baidu-action" data-action="upload">本地上传到百度云</a></li>
+<li><a href="#" class="list-button item-link baidu-more">更多操作</a></li>
+</ul>
+</div>
+
+<div class="content-block-title">操作服务器</div>
+<div class="content-block">
+  <div class="row">
+    <div class="col-50"><a href="#" class="button button-big button-fill color-blue restart-xunlei">重启远程迅雷</a></div>
+    <div class="col-50"><a href="#" class="button button-big button-fill color-red restart-server">重启服务器</a></div>
+  </div>
+</div>
+
+<div class="list-block inset">
+  <ul>
+  <li><a href="#" class="item-link list-button open-login">安全退出</a></li>
+  </ul>
+</div>
+
+
+
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="notifications list-block media-list">
+    <ul>
+      <li class="notification-item"></li>
+    </ul>
+  </div> 
+
+
+   <div class="login-screen">
+    <div class="view">
+      <div class="page">
+        <div class="page-content login-screen-content">
+          <div class="login-screen-title">登录我的控制台</div>
+          <form id="login-screen-form">
+            <div class="list-block">
+              <ul>
+                <li class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title label">用户名</div>
+                    <div class="item-input">
+                      <input type="text" name="username" placeholder="输入你的用户名">
+                    </div>
+                  </div>
+                </li>
+                <li class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title label">密码</div>
+                    <div class="item-input">
+                      <input type="password" name="password" placeholder="输入你的密码">
+                    </div>
+                  </div>
+                </li>
+                <li class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title label">下次自动登录</div>
+                    <div class="item-input">
+                      <label class="label-switch">
+                        <input type="checkbox" name="autologin">
+                        <div class="checkbox"></div>
+                      </label>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="list-block inset">
+              <ul>
+                <li style="padding:0 15px"><a href="#" class="button button-big button-fill color-blue">登   录</a></li>
+              </ul>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script type="text/template7" id="baiduList">
+    <div class="pages navbar-through toolbar-through">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="left sliding">
+            <a href="#" class="back link"><i class="icon icon-back"></i><span>后退</span></a>
+          </div>
+          <div class="center">文件对比列表</div>
+        </div>
+      </div>
+      <div class="page" data-page="baidulist">
+        
+        <div class="toolbar tabbar tabbar-labels">
+          <div class="toolbar-inner">
+            <a href="#baidu-tab1" class="tab-link active"><i class="icon fa fa-mixcloud" style="font-size:26px;">{{#if stat.remote}}<span class="badge bg-red">{{stat.remote}}</span>{{/if}}</i><span class="tabbar-label">远程</span></a>
+            <a href="#baidu-tab2" class="tab-link"><i class="icon fa fa-laptop" style="font-size:26px;">{{#if stat.local}}<span class="badge bg-blue">{{stat.local}}</span>{{/if}}</i><span class="tabbar-label">本地</span></a>
+            <a href="#baidu-tab3" class="tab-link"><i class="icon fa fa-retweet" style="font-size:26px;">{{#if stat.diff}}<span class="badge bg-red">{{stat.diff}}</span>{{/if}}</i><span class="tabbar-label">差异</span></a>
+            <a href="#baidu-tab4" class="tab-link"><i class="icon fa fa-files-o" style="font-size:26px;">{{#if stat.same}}<span class="badge bg-green">{{stat.same}}</span>{{/if}}</i><span class="tabbar-label">相同</span></a>
+          </div>
+        </div>
+
+        <div class="tabs-animated-wrap">
+
+          <div class="tabs">
+
+            <div id="baidu-tab1" class="tab active" style="height:100%;">
+              <div class="page-content pull-to-refresh-content" style="overflow: auto;">
+                <div class="pull-to-refresh-layer">
+                  <div class="preloader"></div>
+                  <div class="pull-to-refresh-arrow"></div>
+                </div>
+
+                {{#if list.remote.length}}
+                <div class="list-block">
+                  <ul>
+                  {{#each list.remote}}
+                    <li class="swipeout">
+                      <div class="swipeout-content">
+                        <a href="#" class="item-content">
+                          <div class="item-inner">
+                            <div class="item-media"><i class="icon fa fa-{{icon}}"></i></div>
+                            <div class="item-title">{{name}}</div>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="swipeout-actions-right">
+                        <a href="#" data-file="{{name}}" data-type="{{type}}" data-action="download" class="baidu-action bg-green">下载</a>
+                        <a href="#" data-file="{{name}}" data-action="delete" data-confirm="确定要删除?" class="baidu-action bg-red">删除</a>
+                        </div>
+                    </li>
+                  {{/each}}
+                  </ul>
+                </div>
+                {{else}}
+                <div style="padding:160px 0;text-align:center;">远程没有不同的文件</div>
+                {{/if}}
+              </div>
+            </div>
+
+            <div id="baidu-tab2" class="tab" style="height:100%;">
+              <div class="page-content pull-to-refresh-content" style="overflow: auto;">
+                <div class="pull-to-refresh-layer">
+                  <div class="preloader"></div>
+                  <div class="pull-to-refresh-arrow"></div>
+                </div>
+
+                {{#if list.local.length}}
+                <div class="list-block">
+                  <ul>
+                  {{#each list.local}}
+                    <li class="swipeout">
+                      <div class="swipeout-content">
+                        <a href="#" class="item-content">
+                          <div class="item-inner">
+                            <div class="item-media"><i class="icon fa fa-{{icon}}"></i></div>
+                            <div class="item-title">{{name}}</div>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="swipeout-actions-right">
+                        <a href="#" data-file="{{name}}" data-type="{{type}}" data-action="upload" class="baidu-action bg-blue">上传</a>
+                        <a href="#" data-file="{{name}}" data-action="dellocal" data-confirm="确定要删除?" class="baidu-action bg-red">删除</a>
+                        </div>
+                    </li>
+                  {{/each}}
+                  </ul>
+                </div>
+                {{else}}
+                <div style="padding:160px 0;text-align:center;">本地没有不同的文件</div>
+                {{/if}}
+
+              </div>
+            </div>
+
+            <div id="baidu-tab3" class="tab" style="height:100%;">
+              <div class="page-content pull-to-refresh-content" style="overflow: auto;">
+                <div class="pull-to-refresh-layer">
+                  <div class="preloader"></div>
+                  <div class="pull-to-refresh-arrow"></div>
+                </div>
+
+                {{#if list.diff.length}}
+                <div class="list-block">
+                  <ul>
+                  {{#each list.diff}}
+                    <li class="swipeout">
+                      <div class="swipeout-content">
+                        <a href="#" class="item-content">
+                          <div class="item-inner">
+                            <div class="item-media"><i class="icon fa fa-{{icon}}"></i></div>
+                            <div class="item-title">{{name}}</div>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="swipeout-actions-right">
+                        <a href="#" data-file="{{name}}" data-type="{{type}}" data-action="upload" class="baidu-action bg-blue">上传</a>
+                        <a href="#" data-file="{{name}}" data-action="download" class="baidu-action bg-green">下载</a>
+                        <a href="#" data-file="{{name}}" data-action="delall" data-confirm="确定要删除文件?" class="baidu-action bg-red">删除远程</a>
+                        </div>
+                    </li>
+                  {{/each}}
+                  </ul>
+                </div>
+                {{else}}
+                <div style="padding:160px 0;text-align:center;">没有不同的文件</div>
+                {{/if}}
+
+              </div>
+            </div>
+            <div id="baidu-tab4" class="tab" style="height:100%;">
+              <div class="page-content pull-to-refresh-content" style="overflow: auto;">
+                <div class="pull-to-refresh-layer">
+                  <div class="preloader"></div>
+                  <div class="pull-to-refresh-arrow"></div>
+                </div>
+
+                {{#if list.same.length}}
+                <div class="list-block">
+                  <ul>
+                  {{#each list.same}}
+                    <li class="swipeout">
+                      <div class="swipeout-content">
+                        <a href="#" class="item-content">
+                          <div class="item-inner">
+                            <div class="item-media"><i class="icon fa fa-{{icon}}"></i></div>
+                            <div class="item-title">{{name}}</div>
+                          </div>
+                        </a>
+                      </div>
+                      <div class="swipeout-actions-right">
+                        <a href="#" data-file="{{name}}" data-action="dellocal" data-confirm="确定要删除本地?" class="baidu-action bg-blue">删本地</a>
+                        <a href="#" data-file="{{name}}" data-action="delete" data-confirm="确定要删除远程?" class="baidu-action bg-orange">删远程</a>
+                        <a href="#" data-file="{{name}}" data-action="delall" data-confirm="确定要完全删除文件?" class="baidu-action bg-red">删全部</a>
+                        </div>
+                    </li>
+                  {{/each}}
+                  </ul>
+                </div>
+                {{else}}
+                <div style="padding:160px 0;text-align:center;">没有相同的文件</div>
+                {{/if}}
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </script>
+
+
+
+  <!-- Path to Framework7 Library JS-->
+  <script type="text/javascript" src="framework7/dist/js/framework7.min.js"></script>
+  <!-- Path to your app js-->
+  <script type="text/javascript">
+    // If we need to use custom DOM library, let's save it to $$ variable:
+    var $$ = Framework7.$;
+
+    // Initialize app
+    var myApp = new Framework7({
+      precompileTemplates: true,
+      modalTitle: '控制台',
+      modalButtonOk: '确定',
+      modalButtonCancel: '取消',
+      modalUsernamePlaceholder: '用户名',
+      modalPasswordPlaceholder: '密码',
+      modalPreloaderTitle: '加载中... '
+    });
+
+    // Add view
+    var mainView = myApp.addView('.view-main', {
+      dynamicNavbar: true
+    });
+
+
+    var loading = false;
+
+    (function()
+    {
+      var auth = localStorage.getItem('auth');
+      if (auth)
+      {
+        $$.ajaxSetup({"headers":{'X-Server-Auth': auth}});
+      }
+      else
+      {
+        // 打开登录窗口
+        myApp.loginScreen();
+      }
+
+      $$(document).on('ajaxComplete', function (e) {
+        var xhr = e.detail.xhr;
+        if (xhr.requestParameters.dataType === 'json')
+        {
+          data = JSON.parse(xhr.responseText);
+          if (data && data.status)
+          {
+            if (data.status === 'errorauth')
+            {
+              myApp.confirm('授权码失效，是否重新登录？', function() {
+                myApp.loginScreen();
+              });
+            }
+          }
+        }
+      });
+
+      $$('#login-screen-form .button').on('click', function() {
+
+        $$.ajax({
+          url : myUrl + 'login',
+          method: 'post',
+          data: new FormData(document.getElementById('login-screen-form')),
+          dataType: 'json',
+          success: function(data,status,xhr) {
+            loading = false;
+            
+            if (data.status == 'ok')
+            {
+              // 关闭登录框
+              myApp.closeModal('.login-screen');
+              $$('#login-screen-form input[type=text]')[0].value = '';
+              $$('#login-screen-form input[type=password]')[0].value = '';
+
+              if ($$('#login-screen-form input[name=autologin]')[0].checked)
+              {
+                // 自动登录，记录在 localStorage 中
+                localStorage.setItem('auth', data.auth);
+              }
+
+              $$.ajaxSetup({"headers":{'X-Server-Auth': data.auth}});
+
+              loadStatus();
+            }
+            else if (data.status == 'errorpass')
+            {
+              myApp.alert('用户名或密码错误，请重试');
+            }
+            else if (data.message)
+            {
+              myApp.alert(data.message);
+            }
+            else
+            {
+              myApp.alert('未知错误');
+            }
+          },
+          complete: function(xhr, status){
+            loading = false;
+          },
+          error: function(xhr, status){
+            myApp.alert('登录失败，请重试');
+          }
+        });
+
+      });
+    })();
+
+    $$('.pull-to-refresh-content').on('refresh', function (e) {
+      setTimeout(function(){
+        loadStatus(myApp.pullToRefreshDone);
+      }, 300);
+    });
+
+    var myUrl = 'http://'+ document.location.hostname + ':83/';
+
+    var loadStatus = function(func)
+    {
+      $$('#xunlei-status .label-switch').addClass('hide');
+      $$('#xunlei-status > .preloader').css('display', '');
+      $$('#xunlei-status > .errorinfo').html('');
+      $$('#afp-status .label-switch').addClass('hide');
+      $$('#afp-status > .preloader').css('display', '');
+      $$('#afp-status > .errorinfo').html('');
+
+      $$.ajax({
+        url : myUrl + 'status',
+        cache : false,
+        dataType: 'json',
+        timeout: 5000,
+        success: function(data,status,xhr){
+          $$('#xunlei-status .label-switch').removeClass('hide');
+          $$('#xunlei-status > .preloader').css('display', 'none');
+          $$('#afp-status .label-switch').removeClass('hide');
+          $$('#afp-status > .preloader').css('display', 'none');
+          
+          if (data.status.xunlei === 'ok')
+          {
+            $$('#xunlei-status .label-switch input')[0].checked = 'checked';
+          }
+          else
+          {
+            $$('#xunlei-status .label-switch input')[0].checked = false;
+          }
+
+          if (data.status.afp === 'ok')
+          {
+            $$('#afp-status .label-switch input')[0].checked = 'checked';
+          }
+          else
+          {
+            $$('#afp-status .label-switch input')[0].checked = false;
+          }
+
+          if (typeof func == 'function')
+          {
+            func();
+          }
+        },
+        error: function(xhr, status){
+          if (status != 200)
+          {
+            $$('#xunlei-status > .preloader').css('display', 'none');
+            $$('#xunlei-status > .errorinfo').html('网络错误('+status+')，点击请重试');
+            $$('#afp-status > .preloader').css('display', 'none');
+            $$('#apf-status > .errorinfo').html('网络错误('+status+')，点击请重试');
+          }
+
+          if (typeof func == 'function')
+          {
+            func();
+          }
+        }
+      });
+    };
+
+    $$('#xunlei-status .label-switch input').on('change', function(e){
+      if (loading)
+      {
+        return;
+      }
+      loading = true;
+
+      changeStatus(this.checked);
+    });
+
+    $$('#xunlei-status > .errorinfo').on('click', loadStatus);
+    $$('#afp-status > .errorinfo').on('click', loadStatus);
+
+    var changeStatus = function(start, func)
+    {
+      // 重置显示加载中
+      $$('#xunlei-status > .preloader').css('display', '');
+      $$('#xunlei-status .label-switch').addClass('hide');
+
+      $$.ajax({
+        url : myUrl + 'xunlei/' + (start ? 'start' : 'stop'),
+        method: 'post',
+        dataType: 'json',
+        success: function(data,status,xhr){
+          loading = false;
+          $$('#xunlei-status .label-switch').removeClass('hide');
+          $$('#xunlei-status > .preloader').css('display', 'none');
+          if (typeof func === 'function')
+          {
+            func(data.status == 'ok');
+          }
+        },
+        complete: function(xhr, status){
+          loading = false;
+        },
+        error: function(xhr, status){
+          if (status != 200)
+          {
+            $$('#xunlei-status > .preloader').css('display', 'none');
+            $$('#xunlei-status > .errorinfo').html('错误，点击请重试');
+          }
+          if (typeof func === 'function')
+          {
+            func(false);
+          }
+        }
+      });
+    };
+
+    $$('.restart-xunlei').on('click', function() {
+      changeStatus(true, function(status){
+        if (status)
+        {
+          $$('#xunlei-status .label-switch input')[0].checked = 'checked';
+        }
+        else
+        {
+          $$('#xunlei-status .label-switch input')[0].checked = false;
+        }
+      });
+    });
+
+
+    var changeAfpStatus = function(start, func)
+    {
+      var afpkey = localStorage.getItem('afpkey');
+      var changeKey = function()
+      {
+        myApp.prompt('请输入密码', function(value) {
+          localStorage.setItem('afpkey', value);
+          changeAfpStatus(start, func);
+        });
+      }
+      if (start && !afpkey)
+      {
+        changeKey();
+
+        return;
+      }
+
+      // 重置显示加载中
+      $$('#afp-status > .preloader').css('display', '');
+      $$('#afp-status .label-switch').addClass('hide');
+
+      var reset = function()
+      {
+        $$('#afp-status > .preloader').css('display', 'none');
+        $$('#afp-status .label-switch input')[0].checked = start ? false : 'checked';
+        $$('#afp-status .label-switch').removeClass('hide');
+      };
+
+      $$.ajax({
+        url : myUrl + 'afp/' + (start ? 'start' : 'stop'),
+        async : true,
+        method: 'post',
+        dataType: 'json',
+        data: start ? {
+          afpkey: afpkey
+        } : {},
+        success: function(data,status,xhr){
+          loading = false;
+          $$('#afp-status .label-switch').removeClass('hide');
+          $$('#afp-status > .preloader').css('display', 'none');
+
+          if (data.status === 'error')
+          {
+            reset();
+            myApp.alert('连接失败，点击请重试或重启服务器');
+            if (typeof func === 'function')
+            {
+              func(false);
+            }
+          }
+          else if (data.status === 'autherror')
+          {
+            // 密码错误
+            reset();
+            myApp.confirm('密码错误，是否重新输入密码？', changeKey);
+            return;
+          }
+          if (typeof func === 'function')
+          {
+            func(data.status == 'ok');
+          }
+        },
+        complete: function(xhr, status){
+          loading = false;
+        },
+        error: function(xhr, status){
+          if (status != 200)
+          {
+            reset();
+            myApp.alert('请求失败，点击请重试');
+          }
+          if (typeof func === 'function')
+          {
+            func(false);
+          }
+        }
+      });
+    };
+
+    $$('#afp-status .label-switch input').on('change', function(e){
+      if (loading)
+      {
+        $$('#afp-status .label-switch input')[0].checked = this.checked ? false : 'checked';
+        return;
+      }
+      loading = true;
+
+      changeAfpStatus(this.checked);
+    });
+
+    $$('.restart-server').on('click', function() {
+      myApp.confirm('确定要重启服务器？', function () {
+        myApp.showPreloader('服务器重启中');
+
+        $$.ajax({
+          url : myUrl + 'reboot',
+          async : true,
+          method: 'post',
+          dataType: 'json',
+          success: function(data,status,xhr){
+            var check = function()
+            {
+              $$.ajax({
+                url : myUrl + 'server/status',
+                async : true,
+                method: 'post',
+                dataType: 'json',
+                timeout: 1000,
+                success: function(data,status,xhr){
+                  myApp.hidePreloader();
+                  myApp.addNotification({
+                      title: '控制台',
+                      message: '服务器启动成功',
+                      hold: 2000
+                  });
+                  loadStatus();
+                },
+                error: function(xhr, status){
+                  setTimeout(check, 1000);
+                }
+              });
+            };
+
+            setTimeout(check, 3000);
+          },
+          error: function(xhr, status){
+            myApp.hidePreloader();
+            myApp.alert('加载失败，请重试');
+          }
+        });
+      });
+    });
+
+
+    var baiduListCheck = function(fun, reload)
+    {
+      $$.ajax({
+        url : myUrl + 'baidu/compare',
+        method: 'post',
+        dataType: 'json',
+        timeout: 1000 * 15,
+        success: function(data,status,xhr){
+          if (data.status == 'nomnt')
+          {
+            myApp.alert('共享盘还没有挂载，请挂载后再操作');
+          }
+          else if (data.status == 'ok')
+          {
+
+            try{
+              mainView.router.load({
+                content: Template7.templates.baiduList(data),
+                reload : reload,
+                animatePages : reload ? false : true,
+                pushState : false
+              });
+            }
+            catch(e)
+            {
+              console.log(e);
+              myApp.alert('页面解析失败');
+            }
+          }
+
+          if (typeof fun == 'function')fun();
+        },
+        error: function(xhr, status){
+          if (typeof fun == 'function')fun();
+          myApp.alert('接口读取失败，请重试');
+        }
+      });
+    };
+    $$('.baidu-compare').on('click', function() {
+      myApp.showIndicator();
+      baiduListCheck(function()
+      {
+        myApp.hideIndicator();
+      });
+    });
+
+
+    $$('.baidu-more').on('click', function()
+    {
+      var btn1 = [
+        {
+            text: '同步到本地并删除本地多余文件',
+            onClick: function(){
+              baiduAction('syncdown');
+            }
+        },
+        {
+            text: '同步到百度并删除百度多余文件',
+            onClick: function()
+            {
+              baiduAction('syncup');
+            }
+        }
+      ];
+      var btn2 = [
+        {
+            text: '取消',
+            color: 'red'
+        }
+      ];
+      myApp.actions([btn1, btn2]);
+    });
+
+    var baiduAction = function(option)
+    {
+      myApp.showIndicator();
+      option = option || {};
+      $$.ajax({
+        url : myUrl + 'baidu/action',
+        method: 'post',
+        data: option,
+        dataType: 'json',
+        timeout: 1000 * 15,
+        success: function(data,status,xhr){
+          myApp.hideIndicator();
+
+          if (data.status == 'nomnt')
+          {
+            myApp.alert('共享盘还没有挂载，请挂载后再操作');
+            return;
+          }
+          else if (data.status == 'ok')
+          {
+            myApp.addNotification({
+                title: '百度云控制台',
+                message: '你的操作已成功',
+                hold: 2000
+            });
+          }
+        },
+        error: function(xhr, status){
+          myApp.hideIndicator();
+          myApp.alert('接口读取失败，请重试');
+        }
+      });
+    };
+
+
+    $$('.baidu-action').on('click', function()
+    {
+      var option = $$(this).dataset() || {};
+      baiduAction(option);
+    });
+
+    var oldAttr = null;
+    myApp.onPageInit('baidulist', function (page) {
+      if (!page)return;
+
+      $$(page.container).find('.baidu-action').on('click', function()
+      {
+        myApp.swipeoutClose(this.parentNode.parentNode);
+        var option = $$(this).dataset() || {};
+        baiduAction(option);
+      });
+
+      $$(page.container).find('.pull-to-refresh-content').on('refresh', function (e) {
+        oldAttr = $$(page.container).find('.toolbar .tab-link.active').attr('href');
+
+        baiduListCheck(null, true);
+      });
+
+      if (oldAttr)
+      {
+        var obj = $$(page.container).find('.tabs-animated-wrap .tabs');
+        obj.css('transition-duration', '0s').css('-webkit-transition-duration', '0s');
+        myApp.showTab(oldAttr);
+        setTimeout(function(){
+          obj.css('transition-duration', '').css('-webkit-transition-duration', '');
+        }, 200);
+        oldAttr = null;
+      }
+    });
+
+
+
+    $$('.open-login').on('click', function () {
+      var auth = localStorage.getItem('auth');
+      if (auth)
+      {
+        $$.getJSON(myUrl+'logout?auth='+ auth);
+        localStorage.removeItem('auth');
+      }
+
+      myApp.loginScreen();
+    });
+
+    loadStatus();
+  </script>
+
+  <link rel="stylesheet" href="font-awesome/css/font-awesome.min">
+
+  </body>
+</html>

@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+error_reporting(7);
+date_default_timezone_set('PRC');
+
+if (in_array('stop', $_SERVER['argv']))
+{
+    @file_get_contents('http://127.0.0.1:83/api/stop');
+    echo "done\n";
+    exit;
+}
+if (in_array('restart', $_SERVER['argv']))
+{
+    @file_get_contents('http://127.0.0.1:83/api/restart');
+    echo "done\n";
+    exit;
+}
+
+
+$serv = new swoole_http_server('0.0.0.0', 83);
+
+
+$serv->on('Request', function($request, $response) 
+{
+    global $callback;
+
+    return $callback($request, $response);
+});
+
+$serv->on('WorkerStart', function($serv, $worker_id) {
+    if (!$serv->taskworker)
+    {
+        global $callback;
+        $callback = require(__DIR__ .'/lib/onrequest.php');
+    }
+});
+
+$serv->on('Start', function()
+{
+    echo '['. date('Y-m-d H:i:s')."] server start.\n";
+});
+
+$serv->set([
+    'daemonize' => 1,
+    'dispatch_mode' => 3,
+]);
+$serv->start();

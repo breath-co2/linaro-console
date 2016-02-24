@@ -149,7 +149,7 @@ cd bypy
 ln -s /root/bypy/bypy.py /usr/local/bin/bypy.py
 ```
 
-执行 `./bypy.py ls` 后输出类似的URL，用页面打开，把里面的授权码复制下来贴进去就耗量
+执行 `./bypy.py ls` 后输出类似的URL，用页面打开，把里面的授权码复制下来贴进去就好了
 
 https://openapi.baidu.com/oauth/2.0/authorize?scope=basic+netdisk&redirect_uri=oob&response_type=code&client_id=aaaaaaaaaaaa
 

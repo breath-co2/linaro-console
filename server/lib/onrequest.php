@@ -200,6 +200,8 @@ return function($request, $response) use ($checkLogin)
                 $data['status'] = 'error';
                 if ($afpkey && preg_match('#^[a-z0-9_\-]+$#i', $afpkey))
                 {
+                    shell_exec($ENV.'mount_afp afp://down:000@10.0.1.1/Data/ /mnt/data > /dev/null &');
+                    sleep(2);
                     $rs = shell_exec($ENV.'mount_afp afp://down:'. $afpkey .'@10.0.1.1/Data/ /mnt/data > /tmp/afp_rs &');
 
                     $t = 0;
@@ -213,7 +215,7 @@ return function($request, $response) use ($checkLogin)
                             # 没有进程了
                             break;
                         }
-                        elseif ($t > 30)
+                        elseif ($t > 10)
                         {
                             # 10 秒还没有连上，强制退出
                             foreach($rs as $item)

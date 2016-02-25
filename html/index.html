@@ -625,7 +625,7 @@
           if (data.status === 'error')
           {
             reset();
-            myApp.alert('连接失败，点击请重试或重启服务器');
+            myApp.alert('连接失败，返回：'+ data.error);
             if (typeof func === 'function')
             {
               func(false);
@@ -704,7 +704,7 @@
               });
             };
 
-            setTimeout(check, 3000);
+            setTimeout(check, 10 * 1000);
           },
           error: function(xhr, status){
             myApp.hidePreloader();

@@ -15,12 +15,19 @@
     <link rel="stylesheet" href="framework7/dist/css/framework7.ios.colors.min.css">
     <link rel="apple-touch-icon-precomposed" href="icon.png" />
     <style type="text/css">
+      html {
+        background: #ccc;
+      }
+      body {
+        margin: 0 auto;
+        box-shadow: 0 0 8px rgba(0,0,0,.4);
+      }
       .hide {
         display: none;
       }
     </style>
   </head>
-  <body>
+  <body style="visibility:hidden">
     <!-- Status bar overlay for full screen mode (PhoneGap) -->
     <div class="statusbar-overlay"></div>
 
@@ -185,10 +192,10 @@
         
         <div class="toolbar tabbar tabbar-labels">
           <div class="toolbar-inner">
-            <a href="#baidu-tab1" class="tab-link active"><i class="icon fa fa-mixcloud" style="font-size:26px;">{{#if stat.remote}}<span class="badge bg-red">{{stat.remote}}</span>{{/if}}</i><span class="tabbar-label">远程</span></a>
+            <a href="#baidu-tab1" class="tab-link active"><i class="icon fa fa-mixcloud" style="font-size:26px;">{{#if stat.remote}}<span class="badge bg-orange">{{stat.remote}}</span>{{/if}}</i><span class="tabbar-label">远程</span></a>
             <a href="#baidu-tab2" class="tab-link"><i class="icon fa fa-laptop" style="font-size:26px;">{{#if stat.local}}<span class="badge bg-blue">{{stat.local}}</span>{{/if}}</i><span class="tabbar-label">本地</span></a>
-            <a href="#baidu-tab3" class="tab-link"><i class="icon fa fa-retweet" style="font-size:26px;">{{#if stat.diff}}<span class="badge bg-red">{{stat.diff}}</span>{{/if}}</i><span class="tabbar-label">差异</span></a>
-            <a href="#baidu-tab4" class="tab-link"><i class="icon fa fa-files-o" style="font-size:26px;">{{#if stat.same}}<span class="badge bg-green">{{stat.same}}</span>{{/if}}</i><span class="tabbar-label">相同</span></a>
+            <a href="#baidu-tab3" class="tab-link"><i class="icon fa fa-retweet" style="font-size:26px;">{{#if stat.diff}}<span class="badge bg-red">{{stat.diff}}</span>{{/if}}</i><span class="tabbar-label">冲突</span></a>
+            <a href="#baidu-tab4" class="tab-link"><i class="icon fa fa-files-o" style="font-size:24px;margin-top:2px;">{{#if stat.same}}<span class="badge bg-green" style="margin-top:-2px;">{{stat.same}}</span>{{/if}}</i><span class="tabbar-label">相同</span></a>
           </div>
         </div>
 
@@ -295,7 +302,7 @@
                   </ul>
                 </div>
                 {{else}}
-                <div style="padding:160px 0;text-align:center;">没有不同的文件</div>
+                <div style="padding:160px 0;text-align:center;">赞，没有冲突的文件</div>
                 {{/if}}
 
               </div>
@@ -350,6 +357,12 @@
     // If we need to use custom DOM library, let's save it to $$ variable:
     var $$ = Framework7.$;
 
+    if ($$(document.body).width() > 740)
+    {
+      $$(document.body).css('max-width', '400px').css('margin', '8px auto');
+    }
+    $$(document.body).css('visibility', '');
+
     // Initialize app
     var myApp = new Framework7({
       precompileTemplates: true,
@@ -374,7 +387,10 @@
       var auth = localStorage.getItem('auth');
       if (auth)
       {
-        $$.ajaxSetup({"headers":{'X-Server-Auth': auth}});
+        $$.ajaxSetup({
+          "headers" : {'X-Server-Auth': auth},
+          "timeout" : 1000 * 30,
+        });
       }
       else
       {
@@ -622,10 +638,14 @@
           $$('#afp-status .label-switch').removeClass('hide');
           $$('#afp-status > .preloader').css('display', 'none');
 
-          if (data.status === 'error')
+          if (data.status == 'ok')
+          {
+            $$('#afp-status .label-switch input')[0].checked = start ? 'checked' : false;
+          }
+          else if (data.status === 'error')
           {
             reset();
-            myApp.alert('连接失败，返回：'+ data.error);
+            myApp.alert(data.message || '连接失败，返回：'+ data.error);
             if (typeof func === 'function')
             {
               func(false);
@@ -638,6 +658,7 @@
             myApp.confirm('密码错误，是否重新输入密码？', changeKey);
             return;
           }
+
           if (typeof func === 'function')
           {
             func(data.status == 'ok');
@@ -725,7 +746,9 @@
         success: function(data,status,xhr){
           if (data.status == 'nomnt')
           {
-            myApp.alert('共享盘还没有挂载，请挂载后再操作');
+            myApp.confirm('共享盘还没有挂载不能继续操作，是否立即挂载？', function() {
+              changeAfpStatus(true);
+            });
           }
           else if (data.status == 'ok')
           {
@@ -768,14 +791,18 @@
         {
             text: '同步到本地并删除本地多余文件',
             onClick: function(){
-              baiduAction('syncdown');
+              myApp.confirm('你确定要这样做？', function(){
+                baiduAction({action:'syncdown'});
+              });
             }
         },
         {
             text: '同步到百度并删除百度多余文件',
             onClick: function()
             {
-              baiduAction('syncup');
+              myApp.confirm('你确定要这样做？', function(){
+                baiduAction({action:'syncup'});
+              });
             }
         }
       ];

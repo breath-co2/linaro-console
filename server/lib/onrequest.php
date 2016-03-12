@@ -165,7 +165,7 @@ return function($request, $response) use ($checkLogin)
                 }
 
                 $rs = [];
-                exec('ls /mnt/data/', $rs);
+                exec('mount | grep /mnt/data', $rs);
                 if (count($rs))
                 {
                     $data['status']['afp'] = 'ok';
@@ -183,8 +183,9 @@ return function($request, $response) use ($checkLogin)
 
             case 'xunlei/restart':
             case 'xunlei/start':
-                exec($ENV.'cd /xunlei && /xunlei/portal', $rs);
-                if (in_array('finished.', $rs))
+                exec($ENV.'cd /xunlei;nohup /xunlei/portal > /tmp/xunlei.log');
+                $rs = file_get_contents('/tmp/xunlei.log');
+                if (false !== strpos($rs, 'finished.'))
                 {
                     $data['status'] = 'ok';
                 }
@@ -198,69 +199,126 @@ return function($request, $response) use ($checkLogin)
                 $afpkey = $request->post['afpkey'];
 
                 $data['status'] = 'error';
-                if ($afpkey && preg_match('#^[a-z0-9_\-]+$#i', $afpkey))
+
+                $fun = null;
+                $fun = function($retry = 0) use (& $fun, & $data, $afpkey, $ENV)
                 {
-                    shell_exec($ENV.'mount_afp afp://down:000@10.0.1.1/Data/ /mnt/data > /dev/null &');
-                    sleep(2);
-                    $rs = shell_exec($ENV.'mount_afp afp://down:'. $afpkey .'@10.0.1.1/Data/ /mnt/data > /tmp/afp_rs &');
-
-                    $t = 0;
-                    while (true) 
+                    if ($afpkey && preg_match('#^[a-z0-9_\-]+$#i', $afpkey))
                     {
-                        $t++;
-                        sleep(1);
-                        exec('ps -e | grep mount_afp', $rs);
-                        if (!$rs)
-                        {
-                            # 没有进程了
-                            break;
-                        }
-                        elseif ($t > 10)
-                        {
-                            # 10 秒还没有连上，强制退出
-                            foreach($rs as $item)
-                            {
-                                list($pid) = explode(' ', trim($item));
-                                exec('kill -9 '. $pid);
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (is_file('/tmp/afp_rs'))
-                    {
-                        $rs = file_get_contents('/tmp/afp_rs');
                         unlink('/tmp/afp_rs');
-                    }
-                    else
-                    {
-                        $rs = '';
-                    }
+                        shell_exec($ENV.'mount_afp afp://down:'. $afpkey .'@10.0.1.1/Data/ /mnt/data > /tmp/afp_rs &');
 
-                    if (false !== strpos($rs, 'succeeded.'))
-                    {
-                        $data['status'] = 'ok';
+                        # 避免被卡死
+                        $t = 0;
+                        while (true) 
+                        {
+                            $t++;
+                            # 0.1 秒刷新一次
+                            usleep(1000 * 100);
+                            $rs = [];
+
+                            exec('ps -e | grep mount_afp', $rs);
+
+                            if (!$rs)
+                            {
+                                # 没有进程了
+                                break;
+                            }
+                            elseif ($t > 100)
+                            {
+                                # 10 秒还没有连上，强制退出
+                                exec('ps -e | grep afpfsd', $rs);
+                                foreach($rs as $item)
+                                {
+                                    list($pid) = explode(' ', trim($item));
+                                    exec('kill -9 '. $pid);
+                                }
+                                clearstatcache();
+                                # 移除连接
+                                if (is_file('/tmp/afp_server-0'))
+                                {
+                                    unlink('/tmp/afp_server-0');
+                                }
+
+                                break;
+                            }
+                        }
+
+                        clearstatcache();
+                        if (is_file('/tmp/afp_rs'))
+                        {
+                            $rs = file_get_contents('/tmp/afp_rs');
+                        }
+                        else
+                        {
+                            $rs = '';
+                        }
+
+                        if (false !== strpos($rs, 'succeeded.') || false !== strpos($rs, 'is already mounted on'))
+                        {
+                            $data['status'] = 'ok';
+                            //shell_exec('nohup /usr/local/bin/lsafp > /dev/null &');
+                        }
+                        elseif (false !== strpos($rs, 'Authentication failed'))
+                        {
+                            $data['status'] = 'autherror';
+                        }
+                        elseif (false !== strpos($rs, 'Volume Data is already mounted'))
+                        {
+                            # 已连接
+                            $data['status'] = 'ok';
+                        }
+                        elseif ($retry == 0 && false !== strpos($rs, 'username/passwd needed'))
+                        {
+                            # 这种情况下再用错误密码重新调一次
+                            shell_exec($ENV.'mount_afp afp://down:000@10.0.1.1/Data/ /mnt/data > /dev/null &');
+                            sleep(3);
+                            $fun($retry + 1);
+                        }
+                        elseif ($retry < 2 && false !== strpos($rs, 'does not exist on server'))
+                        {
+                            # 这种情况下再重新调一次
+                            $fun($retry + 1);
+                        }
+                        else
+                        {
+                            $data['error'] = $rs;
+                        }
                     }
-                    elseif (false !== strpos($rs, 'Authentication failed'))
-                    {
-                        $data['status'] = 'autherror';
-                    }
-                    elseif (false !== strpos($rs, 'Volume Data is already mounted'))
-                    {
-                        # 已连接
-                        $data['status'] = 'ok';
-                    }
-                    else
-                    {
-                        $data['error'] = $rs;
-                    }
-                }
+                };
+
+                $fun(0);
+
                 break;
 
             case 'afp/stop':
-                exec('umount /mnt/data/', $rs);
-                $data['status'] = 'ok';
+                exec('umount /mnt/data/');
+
+                if ($s !== 0)
+                {
+                    clearstatcache();
+                    if (!glob('/mnt/data/*'))
+                    {
+                        $data['status'] = 'ok';
+                    }
+                    else
+                    {
+                        $data['status'] = 'error';
+                        $data['message'] = '设备正在使用，无法退出';
+                    }
+                }
+                else
+                {
+                    $data['status'] = 'ok';
+                }
+
+                if ($data['status'] === 'ok')
+                {
+                    # 杀掉防休眠脚本
+                    exec('killall -9 lsafp');
+                    exec('killall afpfsd');
+                }
+
                 break;
 
             case 'reboot':
@@ -294,14 +352,14 @@ return function($request, $response) use ($checkLogin)
                 break;
 
             case 'baidu/compare':
-                $rootDir = '/mnt/baidu';
+                $rootDir = '/mnt/data/baidu';
              
                 # 先检查下是否挂载共享盘
-                exec("ls {$rootDir}", $rs);
-                if (!count($rs))
+                clearstatcache();
+                if (!is_dir($rootDir))
                 {
-                    //$data['status'] = 'nomnt';
-                    //break;
+                    $data['status'] = 'nomnt';
+                    break;
                 }
 
                 $rs = shell_exec($ENV.'/usr/bin/python3 -x /root/bypy/bypy.py compare / '. $rootDir);
@@ -357,14 +415,14 @@ return function($request, $response) use ($checkLogin)
 
                 break;
             case 'baidu/action':
-                $rootDir = '/mnt/baidu';
+                $rootDir = '/mnt/data/baidu';
 
                 # 先检查下是否挂载共享盘
-                exec("ls {$rootDir}/", $rs);
-                if (!count($rs))
+                clearstatcache();
+                if (!is_dir($rootDir))
                 {
-                    //$data['status'] = 'nomnt';
-                    //break;
+                    $data['status'] = 'nomnt';
+                    break;
                 }
 
                 $action = $request->post['action'];
@@ -412,9 +470,14 @@ return function($request, $response) use ($checkLogin)
                         break;
 
                     case 'syncdown':
+                        # 同步下载
+                        $rs = shell_exec($ENV.'/usr/bin/python3 -x /root/bypy/bypy.py '. $action. ' / '. $rootDir .' true');
+                        break;
+                    
                     case 'syncup':
-                        # 同步下载、同步上传
-                        $rs = shell_exec($ENV.'/usr/bin/python3 -x /root/bypy/bypy.py '. $action. ' / '. $rootDir);
+                        # 同步上传
+                        $rs = shell_exec($ENV.'/usr/bin/python3 -x /root/bypy/bypy.py '. $action. ' '. $rootDir .' / true');
+                        break;
                     
                     default:
                         break;
